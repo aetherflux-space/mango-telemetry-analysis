@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-def plot_atd_summary(coll, telemetry_mnemoic, column_groups, start_time=None, end_time=None, units=None):
+def plot_atd_summary(coll, telemetry_mnemoic, column_groups, start_time=None, end_time=None, units=None, event_times=None, event_labels=None):
     """
     Plot telemetry data in vertical stack of plots based on specified column groups.
 
@@ -37,13 +37,22 @@ def plot_atd_summary(coll, telemetry_mnemoic, column_groups, start_time=None, en
         ax.legend()
         ax.grid(True)
 
-        if start_time:
-            for ax in axes:
-                ax.set_xlim(left=start_time)
+    # Apply x-axis limits
+    if start_time:
+        for ax in axes:
+            ax.set_xlim(left=start_time)
         
-        if end_time:
+    if end_time:
+        for ax in axes:
+            ax.set_xlim(right=end_time)
+
+    # Add event lines
+    if event_times and event_labels:
+        for event_time, event_label in zip(event_times, event_labels):
+            if event_time < start_time or event_time > end_time:
+                continue
             for ax in axes:
-                ax.set_xlim(right=end_time)
+                ax.axvline(event_time, color='red', linestyle='--', linewidth=0.5)
+                ax.text(event_time, ax.get_ylim()[1], event_label, rotation=90, fontsize=7, ha='left', va='top')
 
     return fig, axes
-
